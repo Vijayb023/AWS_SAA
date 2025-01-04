@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host a Static Website Using AWS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .workflow {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .workflow-step {
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .workflow-step span {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .workflow-step-details {
+            display: none;
+            margin-left: 30px;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        .aws-services {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .aws-service {
+            cursor: pointer;
+            text-align: center;
+        }
+        .aws-service img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .service-details {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            max-width: 400px;
+            z-index: 1000;
+            display: none;
+        }
+        .service-details h2 {
+            margin-top: 0;
+        }
+        .service-details button {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            float: right;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Steps to Host a Static Website Using AWS</h1>
+    <div class="workflow">
+        <div class="workflow-step" onclick="toggleDetails(this)">
+            <span>1</span>
+            Create an S3 Bucket
+            <div class="workflow-step-details">Go to the AWS Management Console, navigate to the S3 service, and create a bucket. Ensure the bucket name is globally unique and select the appropriate region.</div>
+        </div>
+        <div class="workflow-step" onclick="toggleDetails(this)">
+            <span>2</span>
+            Enable Static Website Hosting
+            <div class="workflow-step-details">In the bucket properties, enable 'Static website hosting'. Specify the index document (e.g., 'index.html') and optional error document.</div>
+        </div>
+        <div class="workflow-step" onclick="toggleDetails(this)">
+            <span>3</span>
+            Upload Your Website Files
+            <div class="workflow-step-details">Upload all your static website files (HTML, CSS, JavaScript, images) to the S3 bucket.</div>
+        </div>
+        <div class="workflow-step" onclick="toggleDetails(this)">
+            <span>4</span>
+            Set Permissions
+            <div class="workflow-step-details">Update the bucket policy to make the files publicly accessible. Use the policy generator or an example policy to configure access.</div>
+        </div>
+        <div class="workflow-step" onclick="toggleDetails(this)">
+            <span>5</span>
+            Access Your Website
+            <div class="workflow-step-details">Use the endpoint provided in the 'Static website hosting' settings to access your website.</div>
+        </div>
+        <div class="workflow-step" onclick="toggleDetails(this)">
+            <span>6</span>
+            Optional - Configure a Custom Domain
+            <div class="workflow-step-details">If you want to use a custom domain, configure your domain's DNS settings to point to the S3 bucket. You may use AWS Route 53 for this setup.</div>
+        </div>
+    </div>
+
+    <h2>Relation to Domain 1: Design Secure Architecture</h2>
+    <p>Hosting a static website on AWS aligns with the AWS Solution Architect Associate certification's Domain 1: Design Secure Architectures in the following ways:</p>
+    <ul>
+        <li><strong>Secure Data Access:</strong> By configuring S3 bucket policies and permissions, you ensure that only intended users can access your website files, maintaining data integrity and security.</li>
+        <li><strong>Scalability and Reliability:</strong> S3's built-in scalability and high availability meet the demands of traffic spikes without manual intervention.</li>
+        <li><strong>DNS Configuration:</strong> Using Route 53 for custom domain integration ensures secure and reliable DNS management.</li>
+        <li><strong>Least Privilege Principle:</strong> The use of bucket policies and IAM roles restricts access to only necessary resources, reducing the attack surface.</li>
+        <li><strong>Encryption:</strong> Although not mandatory for static websites, enabling server-side encryption adds an extra layer of security for stored objects.</li>
+    </ul>
+
+    <div class="aws-services">
+        <div class="aws-service" onclick="showServiceDetails('S3')">
+            <img src="aws_s3_logo.png" alt="AWS S3">
+            <p>S3</p>
+        </div>
+        <div class="aws-service" onclick="showServiceDetails('Route53')">
+            <img src="aws_route53_logo.png" alt="AWS Route 53">
+            <p>Route 53</p>
+        </div>
+        <div class="aws-service" onclick="showServiceDetails('CloudFront')">
+            <img src="aws_cloudfront_logo.png" alt="AWS CloudFront">
+            <p>CloudFront</p>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeServiceDetails()"></div>
+    <div class="service-details" id="serviceDetails">
+        <button onclick="closeServiceDetails()">Close</button>
+        <h2 id="serviceTitle"></h2>
+        <p id="serviceDescription"></p>
+    </div>
+
+    <script>
+        function toggleDetails(element) {
+            const details = element.querySelector('.workflow-step-details');
+            if (details.style.display === 'none' || !details.style.display) {
+                details.style.display = 'block';
+            } else {
+                details.style.display = 'none';
+            }
+        }
+
+        function showServiceDetails(service) {
+            const descriptions = {
+                'S3': 'Amazon S3 is used to store the static website files, such as HTML, CSS, JavaScript, and images. It acts as the core storage and hosting platform for the website.',
+                'Route53': 'Amazon Route 53 is used to configure a custom domain name and route internet traffic to the S3 bucket hosting the website, ensuring reliable and efficient DNS resolution.',
+                'CloudFront': 'Amazon CloudFront is used to distribute the website content globally with low latency and high transfer speeds, enhancing the user experience for visitors around the world.'
+            };
+
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('serviceDetails').style.display = 'block';
+            document.getElementById('serviceTitle').textContent = service;
+            document.getElementById('serviceDescription').textContent = descriptions[service] || 'Service description not available.';
+        }
+
+        function closeServiceDetails() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('serviceDetails').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
